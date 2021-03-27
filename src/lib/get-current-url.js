@@ -4,6 +4,6 @@
   };
   
   export const getClientUrl = () => {
-    return `${protocol}://${window.location.origin}/api/auth`;
+    return `${window.location.origin}/api/auth`;
   };
   
