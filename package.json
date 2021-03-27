@@ -1,9 +1,12 @@
 {
-  "name": "next-auth",
+  "name": "@outsauced/next-auth",
   "version": "0.0.0-semantically-released",
   "description": "Authentication for Next.js",
   "homepage": "https://next-auth.js.org",
-  "repository": "https://github.com/nextauthjs/next-auth.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/outsauced/next-auth.git"
+  },
   "author": "Iain Collins <me@iaincollins.com>",
   "main": "index.js",
   "scripts": {
@@ -116,5 +119,11 @@
       "type": "github",
       "url": "https://github.com/sponsors/balazsorban44"
     }
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/outsauced/next-auth/issues"
+  },
+  "directories": {
+    "test": "test"
+  }
 }
