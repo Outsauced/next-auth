@@ -1,5 +1,5 @@
   export const getServerUrl = req => {
-    var protocol = window.location.href.indexOf("https://")==0?"https":"http";
+    var protocol = req.headers.host.indexOf("http://")==0?"http://":"";
     return `${protocol}://${req.headers.host}/api/auth`;
   };
   
