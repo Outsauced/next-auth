@@ -1,9 +1,10 @@
   export const getServerUrl = req => {
-    const protocol = new URL(req.headers.host).protocol || "http";
+    var protocol = req.headers.host.indexOf("https://")==0?"https":"http";
     return `${protocol}://${req.headers.host}/api/auth`;
   };
   
   export const getClientUrl = () => {
-    return `${window.location.origin}/api/auth`;
+    var protocol = window.location.href.indexOf("https://")==0?"https":"http";
+    return `${protocol}://${window.location.origin}/api/auth`;
   };
   
