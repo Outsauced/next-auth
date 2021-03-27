@@ -112,12 +112,12 @@ function _serialize (name, val, options) {
  * @TODO Review cookie settings (names, options)
  * @return {import("./cookie").CookiesOptions}
  */
-export function defaultCookies (useSecureCookies) {
+export function defaultCookies (useSecureCookies, url) {
   const cookiePrefix = useSecureCookies ? '__Secure-' : ''
   return {
     // default cookie options
     sessionToken: {
-      name: `${cookiePrefix}next-auth.session-token`,
+      name: `${cookiePrefix}${url}.session-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -126,7 +126,7 @@ export function defaultCookies (useSecureCookies) {
       }
     },
     callbackUrl: {
-      name: `${cookiePrefix}next-auth.callback-url`,
+      name: `${cookiePrefix}${url}.callback-url`,
       options: {
         sameSite: 'lax',
         path: '/',
@@ -136,7 +136,7 @@ export function defaultCookies (useSecureCookies) {
     csrfToken: {
       // Default to __Host- for CSRF token for additional protection if using useSecureCookies
       // NB: The `__Host-` prefix is stricter than the `__Secure-` prefix.
-      name: `${useSecureCookies ? '__Host-' : ''}next-auth.csrf-token`,
+      name: `${useSecureCookies ? '__Host-' : ''}${url}.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -145,7 +145,7 @@ export function defaultCookies (useSecureCookies) {
       }
     },
     pkceCodeVerifier: {
-      name: `${cookiePrefix}next-auth.pkce.code_verifier`,
+      name: `${cookiePrefix}${url}.pkce.code_verifier`,
       options: {
         httpOnly: true,
         sameSite: 'lax',

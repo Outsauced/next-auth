@@ -1,16 +1,17 @@
 import getAuthorizationUrl from '../lib/signin/oauth'
 import emailSignin from '../lib/signin/email'
 import logger from '../../lib/logger'
+import { getServerUrl } from "../../lib/get-current-url"
 
 /** Handle requests to /api/auth/signin */
 export default async function signin (req, res) {
   const {
     provider,
-    baseUrl,
-    basePath,
     adapter,
     callbacks
   } = req.options
+
+  const url = getServerUrl(req)
 
   if (!provider.type) {
     return res.status(500).end(`Error: Type not specified for ${provider.name}`)
@@ -22,14 +23,16 @@ export default async function signin (req, res) {
       return res.redirect(authorizationUrl)
     } catch (error) {
       logger.error('SIGNIN_OAUTH_ERROR', error)
-      return res.redirect(`${baseUrl}${basePath}/error?error=OAuthSignin`)
+      return res.redirect(`${url}/error?error=OAuthSignin`)
     }
   } else if (provider.type === 'email' && req.method === 'POST') {
     if (!adapter) {
       logger.error('EMAIL_REQUIRES_ADAPTER_ERROR')
-      return res.redirect(`${baseUrl}${basePath}/error?error=Configuration`)
+      return res.redirect(`${url}/error?error=Configuration`)
     }
     const { getUserByEmail } = await adapter.getAdapter(req.options)
+
+
 
     // Note: Technically the part of the email address local mailbox element
     // (everything before the @ symbol) should be treated as 'case sensitive'
@@ -46,13 +49,13 @@ export default async function signin (req, res) {
     try {
       const signInCallbackResponse = await callbacks.signIn(profile, account, { email, verificationRequest: true })
       if (signInCallbackResponse === false) {
-        return res.redirect(`${baseUrl}${basePath}/error?error=AccessDenied`)
+        return res.redirect(`${url}/error?error=AccessDenied`)
       } else if (typeof signInCallbackResponse === 'string') {
         return res.redirect(signInCallbackResponse)
       }
     } catch (error) {
       if (error instanceof Error) {
-        return res.redirect(`${baseUrl}${basePath}/error?error=${encodeURIComponent(error)}`)
+        return res.redirect(`${url}/error?error=${encodeURIComponent(error)}`)
       }
       // TODO: Remove in a future major release
       logger.warn('SIGNIN_CALLBACK_REJECT_REDIRECT')
@@ -60,15 +63,15 @@ export default async function signin (req, res) {
     }
 
     try {
-      await emailSignin(email, provider, req.options)
+      await emailSignin(email, provider, req.options, url)
     } catch (error) {
       logger.error('SIGNIN_EMAIL_ERROR', error)
-      return res.redirect(`${baseUrl}${basePath}/error?error=EmailSignin`)
+      return res.redirect(`${url}/error?error=EmailSignin`)
     }
 
-    return res.redirect(`${baseUrl}${basePath}/verify-request?provider=${encodeURIComponent(
+    return res.redirect(`${url}/verify-request?provider=${encodeURIComponent(
       provider.id
     )}&type=${encodeURIComponent(provider.type)}`)
   }
-  return res.redirect(`${baseUrl}${basePath}/signin`)
+  return res.redirect(`${url}/signin`)
 }

@@ -11,6 +11,7 @@
 import { useState, useEffect, useContext, createContext, createElement } from 'react'
 import _logger, { proxyLogger } from '../lib/logger'
 import parseUrl from '../lib/parse-url'
+import { getServerUrl, getClientUrl } from "../lib/get-current-url"
 
 // This behaviour mirrors the default behaviour for getting the site name that
 // happens server side in server/index.js
@@ -22,8 +23,6 @@ import parseUrl from '../lib/parse-url'
 const __NEXTAUTH = {
   baseUrl: parseUrl(process.env.NEXTAUTH_URL || process.env.VERCEL_URL).baseUrl,
   basePath: parseUrl(process.env.NEXTAUTH_URL).basePath,
-  baseUrlServer: parseUrl(process.env.NEXTAUTH_URL_INTERNAL || process.env.NEXTAUTH_URL || process.env.VERCEL_URL).baseUrl,
-  basePathServer: parseUrl(process.env.NEXTAUTH_URL_INTERNAL || process.env.NEXTAUTH_URL).basePath,
   keepAlive: 0,
   clientMaxAge: 0,
   // Properties starting with _ are used for tracking internal app state
@@ -180,8 +179,8 @@ async function getCsrfToken (ctx) {
  * [Documentation](https://next-auth.js.org/getting-started/client#getproviders)
  * @type {import(".").GetProviders}
  */
-export async function getProviders () {
-  return _fetchData('providers')
+export async function getProviders (ctx) {
+  return _fetchData('providers', ctx)
 }
 
 /**
@@ -299,9 +298,7 @@ export async function signOut (options = {}) {
 // method is being left in as an alternative, that will be helpful if/when we
 // expose a vanilla JavaScript version that doesn't depend on React.
 /** @type {import(".").SetOptions} */
-export function setOptions ({ baseUrl, basePath, clientMaxAge, keepAlive } = {}) {
-  if (baseUrl) __NEXTAUTH.baseUrl = baseUrl
-  if (basePath) __NEXTAUTH.basePath = basePath
+export function setOptions ({ clientMaxAge, keepAlive } = {}) {
   if (clientMaxAge) __NEXTAUTH.clientMaxAge = clientMaxAge
   if (keepAlive) {
     __NEXTAUTH.keepAlive = keepAlive
@@ -347,7 +344,7 @@ export function Provider ({ children, session, options }) {
  */
 async function _fetchData (path, { ctx, req = ctx?.req } = {}) {
   try {
-    const baseUrl = await _apiBaseUrl()
+    const baseUrl = await _apiBaseUrl(req)
     const options = req ? { headers: { cookie: req.headers.cookie } } : {}
     const res = await fetch(`${baseUrl}/${path}`, options)
     const data = await res.json()
@@ -358,18 +355,13 @@ async function _fetchData (path, { ctx, req = ctx?.req } = {}) {
   }
 }
 
-function _apiBaseUrl () {
-  if (typeof window === 'undefined') {
-    // NEXTAUTH_URL should always be set explicitly to support server side calls - log warning if not set
-    if (!process.env.NEXTAUTH_URL) {
-      logger.warn('NEXTAUTH_URL', 'NEXTAUTH_URL environment variable not set')
-    }
-
-    // Return absolute path when called server side
-    return `${__NEXTAUTH.baseUrlServer}${__NEXTAUTH.basePathServer}`
+function _apiBaseUrl(req) {
+  if (typeof window === "undefined") {
+    return getServerUrl(req);
   }
+
   // Return relative path when called client side
-  return __NEXTAUTH.basePath
+  return getClientUrl();
 }
 
 /** Returns the number of seconds elapsed since January 1, 1970 00:00:00 UTC. */

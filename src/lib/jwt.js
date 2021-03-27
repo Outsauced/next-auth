@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import jose from 'jose'
 import logger from './logger'
+import { getServerUrl } from "./get-current-url";
 
 // Set default algorithm to use for auto-generated signing key
 const DEFAULT_SIGNATURE_ALGORITHM = 'HS512'
@@ -100,6 +101,8 @@ async function decode ({
  * }} params
  */
 async function getToken (params) {
+  const currentUrl = getServerUrl(params.req);
+  
   const {
     req,
     // Use secure prefix for cookie name, unless URL is NEXTAUTH_URL is http://

@@ -14,6 +14,7 @@ import csrfTokenHandler from './lib/csrf-token-handler'
 import createSecret from './lib/create-secret'
 import * as pkce from './lib/oauth/pkce-handler'
 import * as state from './lib/oauth/state-handler'
+import { getServerUrl } from "../lib/get-current-url";
 
 // To work properly in production with OAuth providers the NEXTAUTH_URL
 // environment variable must be set.
@@ -42,6 +43,8 @@ async function NextAuthHandler (req, res, userOptions) {
   return new Promise(async resolve => { // eslint-disable-line no-async-promise-executor
     extendRes(req, res, resolve)
 
+    const currentUrl = getServerUrl(req);
+
     if (!req.query.nextauth) {
       const error = 'Cannot find [...nextauth].js in pages/api/auth. Make sure the filename is written correctly.'
 
@@ -57,10 +60,10 @@ async function NextAuthHandler (req, res, userOptions) {
     } = req.query
 
     // @todo refactor all existing references to baseUrl and basePath
-    const { basePath, baseUrl } = parseUrl(process.env.NEXTAUTH_URL || process.env.VERCEL_URL)
+    const { basePath, baseUrl } = parseUrl(currentUrl)
 
     const cookies = {
-      ...cookie.defaultCookies(userOptions.useSecureCookies || baseUrl.startsWith('https://')),
+      ...cookie.defaultCookies(userOptions.useSecureCookies || baseUrl.startsWith('https://'), currentUrl),
       // Allow user cookie options to override any cookie settings above
       ...userOptions.cookies
     }
@@ -69,7 +72,7 @@ async function NextAuthHandler (req, res, userOptions) {
 
     const { csrfToken, csrfTokenVerified } = csrfTokenHandler(req, res, cookies, secret)
 
-    const providers = parseProviders({ providers: userOptions.providers, baseUrl, basePath })
+    const providers = parseProviders({ providers: userOptions.providers, baseUrl: currentUrl, basePath })
     const provider = providers.find(({ id }) => id === providerId)
 
     if (provider &&
@@ -97,7 +100,7 @@ async function NextAuthHandler (req, res, userOptions) {
       // These computed settings can have values in userOptions but we override them
       // and are request-specific.
       adapter,
-      baseUrl,
+      baseUrl: currentUrl,
       basePath,
       action,
       provider,
@@ -189,7 +192,7 @@ async function NextAuthHandler (req, res, userOptions) {
             'EmailSignin',
             'CredentialsSignin'
           ].includes(error)) {
-            return res.redirect(`${baseUrl}${basePath}/signin?error=${error}`)
+            return res.redirect(`${baseUrl}/signin?error=${error}`)
           }
 
           return render.error({ error })
@@ -205,18 +208,18 @@ async function NextAuthHandler (req, res, userOptions) {
             return routes.signin(req, res)
           }
 
-          return res.redirect(`${baseUrl}${basePath}/signin?csrf=true`)
+          return res.redirect(`${baseUrl}/signin?csrf=true`)
         case 'signout':
           // Verified CSRF Token required for signout
           if (csrfTokenVerified) {
             return routes.signout(req, res)
           }
-          return res.redirect(`${baseUrl}${basePath}/signout?csrf=true`)
+          return res.redirect(`${baseUrl}/signout?csrf=true`)
         case 'callback':
           if (provider) {
             // Verified CSRF Token required for credentials providers only
             if (provider.type === 'credentials' && !csrfTokenVerified) {
-              return res.redirect(`${baseUrl}${basePath}/signin?csrf=true`)
+              return res.redirect(`${baseUrl}/signin?csrf=true`)
             }
 
             if (await pkce.handleCallback(req, res)) return

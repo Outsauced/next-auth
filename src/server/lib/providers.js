@@ -1,8 +1,8 @@
 /** Adds `signinUrl` and `callbackUrl` to each provider. */
-export default function parseProviders ({ providers = [], baseUrl, basePath }) {
+export default function parseProviders ({ providers = [], baseUrl }) {
   return providers.map((provider) => ({
     ...provider,
-    signinUrl: `${baseUrl}${basePath}/signin/${provider.id}`,
-    callbackUrl: `${baseUrl}${basePath}/callback/${provider.id}`
+    signinUrl: `${baseUrl}/signin/${provider.id}`,
+    callbackUrl: `${baseUrl}/callback/${provider.id}`
   }))
 }

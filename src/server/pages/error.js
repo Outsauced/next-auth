@@ -11,7 +11,7 @@ import { h } from 'preact' // eslint-disable-line no-unused-vars
  * }} params
  */
 export default function error ({ baseUrl, basePath, error = 'default', res }) {
-  const signinPageUrl = `${baseUrl}${basePath}/signin`
+  const signinPageUrl = `${baseUrl}/signin`
 
   const errors = {
     default: {
