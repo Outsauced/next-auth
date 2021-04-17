@@ -34,7 +34,7 @@
     "publish:canary": "npm publish --tag canary",
     "lint": "ts-standard",
     "lint:fix": "ts-standard --fix"
-  }9
+  },
   "files": [
     "dist",
     "index.js",
