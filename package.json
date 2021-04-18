@@ -1,6 +1,6 @@
 {
   "name": "@outsauced/next-auth",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Authentication for Next.js",
   "homepage": "https://next-auth.js.org",
   "repository": {
@@ -97,7 +97,6 @@
     "puppeteer": "^5.2.1",
     "puppeteer-extra": "^3.1.15",
     "puppeteer-extra-plugin-stealth": "^2.6.1",
-    "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "ts-standard": "^10.0.0",
     "typescript": "^4.1.3"
