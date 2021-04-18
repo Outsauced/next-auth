@@ -14,8 +14,9 @@ export const getServerUrl = req => {
 };
 
 export const getClientUrl = () => {
-  const protocol = url.startsWith("http:") ? "http" : "https";
+  return window.location.href;
+  // const protocol = window.location.protocol || "https";
 
-  console.log("Running Client >>>>", `${window.location.origin}/api/auth`);
-  return `${protocol}://${window.location.origin}/api/auth`;
+  // console.log("Running Client >>>>", `${window.location.origin}/api/auth`);
+  // return `${protocol}://${window.location.origin}/api/auth`;
 };
