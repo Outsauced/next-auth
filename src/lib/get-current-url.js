@@ -2,15 +2,14 @@ import logger from "./logger";
 
 export const getServerUrl = req => {
   // Default to HTTPS if no protocol explictly specified
-  const protocol = url.startsWith("http:") ? "http" : "https";
+  const protocol = req.protocol || "https";
 
   console.log(
     "Running Serversssss >>>",
-    req.headers.host,
-    `${protocol}://${req.headers.host}/api/auth`
+    protocol + "://" + req.get("host") + req.originalUrl
   );
 
-  return `${protocol}://${req.headers.host}/api/auth`;
+  return protocol + "://" + req.get("host") + req.originalUrl;
 };
 
 export const getClientUrl = () => {
